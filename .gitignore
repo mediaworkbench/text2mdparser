@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE configuration folders
+.idea/
+.vscode/
+
+# Log files
+app.log
+
+# Testing
+.pytest_cache/
+.coverage
+
+# Configuration files
+config/config.ini
+
+# Data directory contents (but keep directories via .gitkeep)
+data/input/*
+data/output/*
+
+# Keep specific .gitkeep files so directories are tracked
+!data/input/.gitkeep
+!data/output/.gitkeep
+
+# Keep demo sample files for product packaging
+!data/input/sample_solar_system.txt
+!data/input/sample_space_demo.txt
