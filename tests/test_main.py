@@ -32,6 +32,7 @@ def mock_config_valid(tmp_path):
         'log_level': 'DEBUG',
         'model_identifier': None,
         'system_prompt': None,
+        'user_prompt_template': None,
         'temperature': 0.7,
         'max_tokens': None,
         'caching_enabled': True,
@@ -103,6 +104,7 @@ def test_process_directory_success(tmp_path, mock_dependencies, mock_config_vali
             timeout=60, 
             model_identifier=None,
             system_prompt=None,
+            user_prompt_template=None,
             temperature=0.7,
             max_tokens=None,
             context_length=8192
@@ -115,6 +117,7 @@ def test_process_directory_success(tmp_path, mock_dependencies, mock_config_vali
             timeout=60, 
             model_identifier=None,
             system_prompt=None,
+            user_prompt_template=None,
             temperature=0.7,
             max_tokens=None,
             context_length=8192
@@ -169,6 +172,7 @@ def test_process_directory_api_failure(tmp_path, mock_dependencies, mock_config_
         timeout=mock_config_valid['api_timeout'],
         model_identifier=None,
         system_prompt=None,
+        user_prompt_template=None,
         temperature=0.7,
         max_tokens=None,
         context_length=8192
@@ -260,6 +264,7 @@ def test_main_passes_timeout_to_api_handler(tmp_path, mocker, caplog):
         'log_level': 'DEBUG',
         'model_identifier': 'test-model-for-timeout',
         'system_prompt': None,
+        'user_prompt_template': None,
         'temperature': 0.7,
         'max_tokens': None,
         'caching_enabled': True,
@@ -287,6 +292,7 @@ def test_main_passes_timeout_to_api_handler(tmp_path, mocker, caplog):
         timeout=custom_timeout,
         model_identifier='test-model-for-timeout',
         system_prompt=None,
+        user_prompt_template=None,
         temperature=0.7,
         max_tokens=None,
         context_length=8192

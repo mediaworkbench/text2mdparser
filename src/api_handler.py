@@ -54,6 +54,7 @@ def call_llm_api(
     timeout: int = 60, 
     model_identifier: str | None = None,
     system_prompt: str | None = None,
+    user_prompt_template: str | None = None,
     temperature: float = 0.7,
     max_tokens: int | None = None,
     context_length: int = 8192
@@ -69,6 +70,7 @@ def call_llm_api(
         timeout: Timeout for the API request in seconds.
         model_identifier: Optional model identifier to use.
         system_prompt: System prompt for the API. If None, uses a default.
+        user_prompt_template: Template for the user prompt, with {text_content} placeholder. If None, uses a default.
         temperature: Temperature for response generation (0.0 to 1.0).
         max_tokens: Maximum tokens in the response. If None, omitted from payload.
         context_length: Context length for the model (used for Ollama and LM Studio loading).
@@ -80,6 +82,10 @@ def call_llm_api(
     if system_prompt is None:
         system_prompt = "You are a helpful assistant that converts text to well-structured Markdown."
     
+    # Default user prompt template if none provided
+    if user_prompt_template is None:
+        user_prompt_template = "Convert the following text to well-structured Markdown.\n\nText:\n{text_content}"
+    
     # For LM Studio, ensure the model is loaded
     if server_type.lower() == 'lmstudio' and model_identifier:
         base_url = api_url.replace('/v1/chat/completions', '')
@@ -89,12 +95,7 @@ def call_llm_api(
             if not load_lmstudio_model(base_url, model_identifier, context_length):
                 logger.warning(f"Failed to load model {model_identifier}, proceeding with API call anyway.")
     
-    prompt_template = """I have attached a medical document scraped from the web. Please create a well-structured Markdown file, logically organized for use in a RAG environment with LLMs. Use headings (`#`, `##`, `###`) to separate sections and subsections. Use lists (`-` or `1.`) where appropriate for enumerated items. Format definitions as definition lists. Do not change any information or wording! Keep the original language (German). Only return the Markdown content and nothing else. Do not wrap the output in ```markdown...```
-
-Document content:
-{text_content}
-"""
-    formatted_prompt = prompt_template.format(text_content=text_content)
+    formatted_prompt = user_prompt_template.format(text_content=text_content)
 
     messages = [
         {"role": "system", "content": system_prompt},

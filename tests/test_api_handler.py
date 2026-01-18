@@ -14,7 +14,7 @@ if str(project_root) not in sys.path:
 
 SAMPLE_API_URL = "http://fake-lmstudio-api.com/v1/chat/completions"
 SAMPLE_TEXT_CONTENT = "This is a test document."
-EXPECTED_PROMPT_START = "I have attached a medical document scraped from the web." # from api_handler
+EXPECTED_PROMPT_START = "Convert the following text to well-structured Markdown." # from api_handler default
 EXPECTED_SYSTEM_MESSAGE = "You are a helpful assistant that converts text to well-structured Markdown."
 
 @pytest.fixture

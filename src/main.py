@@ -126,6 +126,7 @@ def process_directory():
             timeout=api_timeout,
             model_identifier=model_identifier,
             system_prompt=config.get('system_prompt'),
+            user_prompt_template=config.get('user_prompt_template'),
             temperature=config.get('temperature', 0.7),
             max_tokens=config.get('max_tokens'),
             context_length=config.get('context_length', 8192)

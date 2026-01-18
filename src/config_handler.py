@@ -74,7 +74,8 @@ def load_config(config_path: str = DEFAULT_CONFIG_PATH) -> dict:
     loaded_config['api_key'] = config.get(api_section, 'api_key', fallback=None)
     loaded_config['api_timeout'] = config.getint(api_section, 'api_timeout', fallback=60)
     loaded_config['model_identifier'] = config.get(api_section, 'model_identifier', fallback=None)
-    loaded_config['system_prompt'] = config.get(api_section, 'system_prompt', fallback=None)
+    loaded_config['system_prompt'] = config.get('General', 'system_prompt', fallback=config.get(api_section, 'system_prompt', fallback=None))
+    loaded_config['user_prompt_template'] = config.get('General', 'user_prompt_template', fallback=config.get(api_section, 'user_prompt_template', fallback=None))
     loaded_config['temperature'] = config.getfloat(api_section, 'temperature', fallback=0.7)
     
     # max_tokens can be None (no limit) or an integer
