@@ -104,7 +104,8 @@ def test_process_directory_success(tmp_path, mock_dependencies, mock_config_vali
             model_identifier=None,
             system_prompt=None,
             temperature=0.7,
-            max_tokens=None
+            max_tokens=None,
+            context_length=8192
         ),
         mocker.call(
             "Content file2", 
@@ -115,7 +116,8 @@ def test_process_directory_success(tmp_path, mock_dependencies, mock_config_vali
             model_identifier=None,
             system_prompt=None,
             temperature=0.7,
-            max_tokens=None
+            max_tokens=None,
+            context_length=8192
         )
     ]
     m_call_api.assert_has_calls(calls, any_order=True)
@@ -168,7 +170,8 @@ def test_process_directory_api_failure(tmp_path, mock_dependencies, mock_config_
         model_identifier=None,
         system_prompt=None,
         temperature=0.7,
-        max_tokens=None
+        max_tokens=None,
+        context_length=8192
     )
 
     output_file1 = output_dir / "error_file.md"
@@ -285,7 +288,8 @@ def test_main_passes_timeout_to_api_handler(tmp_path, mocker, caplog):
         model_identifier='test-model-for-timeout',
         system_prompt=None,
         temperature=0.7,
-        max_tokens=None
+        max_tokens=None,
+        context_length=8192
     )
 
     # Check that the output file was created
@@ -375,6 +379,7 @@ class TestCachingLogic:
             'api_timeout': 60,
             'model_identifier': None, # Added to base_config for completeness
             'type': 'lmstudio',  # Added for server type
+            'context_length': 8192,  # Added context length
             # Default logging setup for tests, actual log content not primary focus here
             'log_file': 'test_cache.log',
             'log_level': 'DEBUG'

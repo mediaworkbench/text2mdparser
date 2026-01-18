@@ -127,7 +127,8 @@ def process_directory():
             model_identifier=model_identifier,
             system_prompt=config.get('system_prompt'),
             temperature=config.get('temperature', 0.7),
-            max_tokens=config.get('max_tokens')
+            max_tokens=config.get('max_tokens'),
+            context_length=config.get('context_length', 8192)
         )
 
         if markdown_output is None:

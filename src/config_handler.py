@@ -87,6 +87,13 @@ def load_config(config_path: str = DEFAULT_CONFIG_PATH) -> dict:
     else:
         loaded_config['max_tokens'] = None
 
+    # context_length
+    context_length_str = config.get(api_section, 'context_length', fallback='8192')
+    try:
+        loaded_config['context_length'] = int(context_length_str)
+    except ValueError:
+        loaded_config['context_length'] = 8192
+
     # Directories (no optional keys specified for now beyond what's essential)
 
     # Logging

@@ -21,14 +21,17 @@ def get_lmstudio_loaded_models(base_url: str) -> list[str]:
         logger.warning(f"Error getting loaded models: {e}")
         return []
 
-def load_lmstudio_model(base_url: str, model_name: str) -> bool:
+def load_lmstudio_model(base_url: str, model_name: str, context_length: int = 8192) -> bool:
     """
     Load a model in LM Studio using the CLI.
+    Note: Context length should be configured in LM Studio server settings.
     """
     try:
-        result = subprocess.run(['lms', 'load', model_name], capture_output=True, text=True, timeout=60)
+        cmd = ['lms', 'load', model_name]
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
         if result.returncode == 0:
             logger.info(f"Successfully loaded model {model_name} via CLI")
+            logger.info(f"Note: Ensure context length is set to {context_length} in LM Studio server settings if needed.")
             return True
         else:
             logger.error(f"Failed to load model {model_name} via CLI: {result.stderr}")
@@ -52,7 +55,8 @@ def call_llm_api(
     model_identifier: str | None = None,
     system_prompt: str | None = None,
     temperature: float = 0.7,
-    max_tokens: int | None = None
+    max_tokens: int | None = None,
+    context_length: int = 8192
 ) -> str | None:
     """
     Calls the LLM API (LM Studio or Ollama) to convert text content to Markdown.
@@ -67,6 +71,7 @@ def call_llm_api(
         system_prompt: System prompt for the API. If None, uses a default.
         temperature: Temperature for response generation (0.0 to 1.0).
         max_tokens: Maximum tokens in the response. If None, omitted from payload.
+        context_length: Context length for the model (used for Ollama and LM Studio loading).
 
     Returns:
         The Markdown content as a string if successful, otherwise None.
@@ -81,7 +86,7 @@ def call_llm_api(
         loaded_models = get_lmstudio_loaded_models(base_url)
         if model_identifier not in loaded_models:
             logger.info(f"Model {model_identifier} not loaded, attempting to load...")
-            if not load_lmstudio_model(base_url, model_identifier):
+            if not load_lmstudio_model(base_url, model_identifier, context_length):
                 logger.warning(f"Failed to load model {model_identifier}, proceeding with API call anyway.")
     
     prompt_template = """I have attached a medical document scraped from the web. Please create a well-structured Markdown file, logically organized for use in a RAG environment with LLMs. Use headings (`#`, `##`, `###`) to separate sections and subsections. Use lists (`-` or `1.`) where appropriate for enumerated items. Format definitions as definition lists. Do not change any information or wording! Keep the original language (German). Only return the Markdown content and nothing else. Do not wrap the output in ```markdown...```
@@ -103,7 +108,8 @@ Document content:
             "stream": False,
             "options": {
                 "temperature": temperature,
-                "num_predict": max_tokens if max_tokens else -1  # Ollama uses -1 for no limit
+                "num_predict": max_tokens if max_tokens else -1,  # Ollama uses -1 for no limit
+                "num_ctx": context_length
             }
         }
     else:  # lmstudio or default to OpenAI format

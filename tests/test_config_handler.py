@@ -27,6 +27,7 @@ def default_expected_config():
         'system_prompt': None,
         'temperature': 0.7,
         'max_tokens': None,
+        'context_length': 8192,
         'caching_enabled': True,
         'caching_force_reprocess_all': False
     }
@@ -212,6 +213,7 @@ force_reprocess_all = true
         'system_prompt': 'Custom system prompt for testing',
         'temperature': 0.3,
         'max_tokens': 4000,
+        'context_length': 8192,
         'caching_enabled': False,
         'caching_force_reprocess_all': True
     }

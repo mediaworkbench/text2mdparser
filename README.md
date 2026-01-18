@@ -68,6 +68,16 @@ pip install -r requirements.txt
     *   `system_prompt`: (Optional) The system prompt sent to the LLM. If not specified, uses a default prompt.
     *   `temperature`: (Optional) Controls randomness in responses (0.0 = deterministic, 1.0 = very random). Default is 0.7.
     *   `max_tokens`: (Optional) Maximum tokens in the response. If not specified, no limit is set.
+    *   `context_length`: (Optional) Context length for the model. For LM Studio, this is configured in the server settings, not via this config. Default is 8192.
+    
+    **[Ollama] Section:**
+    *   `api_url`: The full URL to your Ollama API endpoint (e.g., `http://localhost:11434/api/chat`).
+    *   `model_identifier`: (Optional) Model identifier to use (e.g., `gemma3:4b`). If not specified, Ollama will use its default.
+    *   `api_timeout`: Timeout for API requests in seconds. Default is 60 seconds if not specified.
+    *   `system_prompt`: (Optional) The system prompt sent to the LLM. If not specified, uses a default prompt.
+    *   `temperature`: (Optional) Controls randomness in responses (0.0 = deterministic, 1.0 = very random). Default is 0.7.
+    *   `max_tokens`: (Optional) Maximum tokens in the response. If not specified, no limit is set.
+    *   `context_length`: (Optional) Context length for the model in tokens. Default is 8192.
     
     **[Directories] Section:**
     *   `input_dir`: Path to the directory containing your input `.txt` files. Relative paths are typically from the project root.
