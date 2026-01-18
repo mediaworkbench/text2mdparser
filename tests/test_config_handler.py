@@ -15,6 +15,7 @@ if str(project_root) not in sys.path:
 @pytest.fixture
 def default_expected_config():
     return {
+        'type': 'lmstudio',
         'api_url': 'http://localhost:1234/v1/chat/completions',
         'input_dir': 'data/input',
         'output_dir': 'data/output',
@@ -33,6 +34,9 @@ def default_expected_config():
 def test_load_config_success(mocker, default_expected_config):
     """Test successful loading of a complete config file."""
     mock_content = """
+[Server]
+type = lmstudio
+
 [LMStudio]
 api_url = http://localhost:1234/v1/chat/completions
 
@@ -67,6 +71,9 @@ def test_load_config_file_not_found(mocker):
 def test_load_config_missing_section(mocker):
     """Test ValueError when an essential section is missing."""
     mock_content = """
+[Server]
+type = lmstudio
+
 [Directories]
 input_dir = data/input
 output_dir = data/output
@@ -80,6 +87,9 @@ output_dir = data/output
 def test_load_config_missing_essential_key(mocker):
     """Test ValueError when an essential key is missing."""
     mock_content = """
+[Server]
+type = lmstudio
+
 [LMStudio]
 # api_url is missing
 
@@ -96,6 +106,9 @@ output_dir = data/output
 def test_load_config_default_api_key(mocker, default_expected_config):
     """Test that api_key defaults to None if not provided."""
     mock_content = """
+[Server]
+type = lmstudio
+
 [LMStudio]
 api_url = http://localhost:1234/v1/chat/completions
 
@@ -118,6 +131,9 @@ log_level = INFO
 def test_load_config_default_logging_settings(mocker, default_expected_config):
     """Test that log_file and log_level use defaults if [Logging] is missing or keys are missing."""
     mock_content_no_logging_section = """
+[Server]
+type = lmstudio
+
 [LMStudio]
 api_url = http://localhost:1234/v1/chat/completions
 
@@ -134,6 +150,9 @@ output_dir = data/output
     assert config['api_timeout'] == 60 # Check default timeout
 
     mock_content_partial_logging = """
+[Server]
+type = lmstudio
+
 [LMStudio]
 api_url = http://localhost:1234/v1/chat/completions
 
@@ -153,6 +172,9 @@ log_file = specific.log
 def test_load_config_custom_settings(mocker):
     """Test loading of custom (non-default) settings."""
     mock_content = """
+[Server]
+type = lmstudio
+
 [LMStudio]
 api_url = http://my.server:5678/v1/custom
 api_key = mysecretkey
@@ -178,6 +200,7 @@ force_reprocess_all = true
     mocker.patch('builtins.open', mock_open(read_data=mock_content))
 
     expected_custom_config = {
+        'type': 'lmstudio',
         'api_url': 'http://my.server:5678/v1/custom',
         'input_dir': 'custom/in',
         'output_dir': 'custom/out',
@@ -199,6 +222,9 @@ def test_load_config_model_identifier_handling(mocker, default_expected_config):
     """Test handling of model_identifier (present, absent)."""
     # Case 1: model_identifier is present
     mock_content_with_model_id = """
+[Server]
+type = lmstudio
+
 [LMStudio]
 api_url = http://localhost:1234/v1/chat/completions
 model_identifier = specific-model-test
@@ -220,6 +246,9 @@ output_dir = data/output
 
     # Case 2: model_identifier is absent (should default to None)
     mock_content_without_model_id = """
+[Server]
+type = lmstudio
+
 [LMStudio]
 api_url = http://localhost:1234/v1/chat/completions
 
@@ -236,6 +265,9 @@ output_dir = data/output
 def test_load_config_with_api_timeout(mocker, default_expected_config):
     """Test loading config with a specific api_timeout."""
     mock_content = """
+[Server]
+type = lmstudio
+
 [LMStudio]
 api_url = http://localhost:1234/v1/chat/completions
 api_timeout = 150
@@ -261,6 +293,9 @@ log_level = INFO
 def test_load_config_without_api_timeout(mocker, default_expected_config):
     """Test loading config without api_timeout, expecting default."""
     mock_content = """
+[Server]
+type = lmstudio
+
 [LMStudio]
 api_url = http://localhost:1234/v1/chat/completions
 # api_timeout is missing
@@ -283,6 +318,9 @@ log_level = INFO
 def test_load_config_log_level_case_insensitivity(mocker, default_expected_config):
     """Test that log_level is case-insensitive and defaults to INFO for invalid values."""
     mock_content_debug_lower = """
+[Server]
+type = lmstudio
+
 [LMStudio]
 api_url = http://localhost:1234/v1/chat/completions
 [Directories]
@@ -297,6 +335,8 @@ log_level = debug
     assert config['log_level'] == 'DEBUG'
 
     mock_content_invalid_level = """
+[Server]
+type = lmstudio
 [LMStudio]
 api_url = http://localhost:1234/v1/chat/completions
 [Directories]
@@ -312,6 +352,8 @@ log_level = FANCYPANTS
 
     # Check that an empty log_level also defaults to INFO
     mock_content_empty_level = """
+[Server]
+type = lmstudio
 [LMStudio]
 api_url = http://localhost:1234/v1/chat/completions
 [Directories]
@@ -330,6 +372,8 @@ log_level =
 
     # Test that log_file defaults if empty
     mock_content_empty_log_file = """
+[Server]
+type = lmstudio
 [LMStudio]
 api_url = http://localhost:1234/v1/chat/completions
 [Directories]
@@ -363,6 +407,8 @@ log_level = INFO
 
     # Final check for default log_file when key itself is missing under [Logging]
     mock_content_missing_log_file_key = """
+[Server]
+type = lmstudio
 [LMStudio]
 api_url = http://localhost:1234/v1/chat/completions
 [Directories]

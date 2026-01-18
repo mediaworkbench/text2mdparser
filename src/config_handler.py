@@ -30,7 +30,7 @@ def load_config(config_path: str = DEFAULT_CONFIG_PATH) -> dict:
 
     # Essential keys that must be present
     essential_sections = {
-        'LMStudio': ['api_url'],
+        'Server': ['type'],
         'Directories': ['input_dir', 'output_dir']
     }
 
@@ -46,16 +46,39 @@ def load_config(config_path: str = DEFAULT_CONFIG_PATH) -> dict:
                 raise ValueError(f"Missing key '{key}' in section [{section}] in configuration file: {config_path}")
             loaded_config[key] = config[section][key]
 
-    # Optional keys with defaults
-    # LMStudio
-    loaded_config['api_key'] = config.get('LMStudio', 'api_key', fallback=None)
-    loaded_config['api_timeout'] = config.getint('LMStudio', 'api_timeout', fallback=60)
-    loaded_config['model_identifier'] = config.get('LMStudio', 'model_identifier', fallback=None)
-    loaded_config['system_prompt'] = config.get('LMStudio', 'system_prompt', fallback=None)
-    loaded_config['temperature'] = config.getfloat('LMStudio', 'temperature', fallback=0.7)
+    # Get server type and determine API section
+    server_type = loaded_config['type'].lower()
+    if server_type == 'lmstudio':
+        api_section = 'LMStudio'
+    elif server_type == 'ollama':
+        api_section = 'Ollama'
+    else:
+        logger.error(f"Invalid server type '{server_type}' in configuration file: {config_path}")
+        raise ValueError(f"Invalid server type '{server_type}' in configuration file: {config_path}")
+
+    # Add API section to essential if not already
+    if api_section not in essential_sections:
+        essential_sections[api_section] = ['api_url']
+        # Check it
+        if api_section not in config:
+            logger.error(f"Missing section [{api_section}] in configuration file: {config_path}")
+            raise ValueError(f"Missing section [{api_section}] in configuration file: {config_path}")
+        for key in essential_sections[api_section]:
+            if key not in config[api_section]:
+                logger.error(f"Missing key '{key}' in section [{api_section}] in configuration file: {config_path}")
+                raise ValueError(f"Missing key '{key}' in section [{api_section}] in configuration file: {config_path}")
+            loaded_config[key] = config[api_section][key]
+
+    # Optional keys from API section
+    # Optional keys from API section
+    loaded_config['api_key'] = config.get(api_section, 'api_key', fallback=None)
+    loaded_config['api_timeout'] = config.getint(api_section, 'api_timeout', fallback=60)
+    loaded_config['model_identifier'] = config.get(api_section, 'model_identifier', fallback=None)
+    loaded_config['system_prompt'] = config.get(api_section, 'system_prompt', fallback=None)
+    loaded_config['temperature'] = config.getfloat(api_section, 'temperature', fallback=0.7)
     
     # max_tokens can be None (no limit) or an integer
-    max_tokens_str = config.get('LMStudio', 'max_tokens', fallback=None)
+    max_tokens_str = config.get(api_section, 'max_tokens', fallback=None)
     if max_tokens_str:
         try:
             loaded_config['max_tokens'] = int(max_tokens_str)

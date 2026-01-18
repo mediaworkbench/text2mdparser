@@ -22,6 +22,7 @@ def mock_config_valid(tmp_path):
     input_dir.mkdir()
     output_dir.mkdir() # process_directory will also try to create it, exist_ok=True handles this
     return {
+        'type': 'lmstudio',
         'api_url': 'http://fake-api.com',
         'api_key': None,
         'input_dir': str(input_dir),
@@ -41,7 +42,7 @@ def mock_config_valid(tmp_path):
 def mock_dependencies(mocker, mock_config_valid):
     """Mocks dependencies for process_directory."""
     m_load_config = mocker.patch('src.main.load_config', return_value=mock_config_valid)
-    m_call_api = mocker.patch('src.main.call_lm_studio_api', return_value="## Mocked Markdown")
+    m_call_api = mocker.patch('src.main.call_llm_api', return_value="## Mocked Markdown")
     # No need to mock Path.rglob, Path.mkdir, open, etc. if using real tmp_path files for basic tests
     # unless specific error conditions for these need to be simulated.
     return m_load_config, m_call_api
@@ -87,9 +88,9 @@ def test_process_directory_success(tmp_path, mock_dependencies, mock_config_vali
     assert m_call_api.call_count == 2 # For file1.txt and sub/file2.txt
 
     # Check API calls (order might not be guaranteed by rglob)
-    # call_lm_studio_api(text_content, api_url, api_key, timeout, model_identifier, system_prompt, temperature, max_tokens)
+    # call_llm_api(text_content, api_url, server_type, api_key, timeout, model_identifier, system_prompt, temperature, max_tokens)
 
-    # Assert that call_lm_studio_api was called with the correct arguments, including model_identifier
+    # Assert that call_llm_api was called with the correct arguments, including model_identifier
     # We check call_count and then inspect individual calls if order is not guaranteed or args vary.
     # For this test, model_identifier, system_prompt, and max_tokens are None from mock_config_valid.
 
@@ -97,6 +98,7 @@ def test_process_directory_success(tmp_path, mock_dependencies, mock_config_vali
         mocker.call(
             "Content file1", 
             mock_config_valid['api_url'], 
+            mock_config_valid['type'],
             mock_config_valid['api_key'], 
             timeout=60, 
             model_identifier=None,
@@ -107,6 +109,7 @@ def test_process_directory_success(tmp_path, mock_dependencies, mock_config_vali
         mocker.call(
             "Content file2", 
             mock_config_valid['api_url'], 
+            mock_config_valid['type'],
             mock_config_valid['api_key'], 
             timeout=60, 
             model_identifier=None,
@@ -159,6 +162,7 @@ def test_process_directory_api_failure(tmp_path, mock_dependencies, mock_config_
     m_call_api.assert_called_once_with(
         "Content for API failure",
         mock_config_valid['api_url'],
+        mock_config_valid['type'],
         mock_config_valid['api_key'],
         timeout=mock_config_valid['api_timeout'],
         model_identifier=None,
@@ -188,7 +192,7 @@ def test_process_directory_input_dir_not_found(tmp_path, mocker, caplog):
         'caching_force_reprocess_all': False
     }
     mocker.patch('src.main.load_config', return_value=mock_config_non_existent_input)
-    m_call_api = mocker.patch('src.main.call_lm_studio_api') # Still need to mock this
+    m_call_api = mocker.patch('src.main.call_llm_api') # Still need to mock this
 
     process_directory()
 
@@ -233,7 +237,7 @@ def test_process_directory_read_error(tmp_path, mock_dependencies, mock_config_v
 # configures the root logger which pytest's caplog then captures.
 
 def test_main_passes_timeout_to_api_handler(tmp_path, mocker, caplog):
-    """Test that process_directory passes the configured api_timeout to call_lm_studio_api."""
+    """Test that process_directory passes the configured api_timeout to call_llm_api."""
     caplog.set_level(logging.INFO)
 
     custom_timeout = 180
@@ -243,6 +247,7 @@ def test_main_passes_timeout_to_api_handler(tmp_path, mocker, caplog):
     output_dir.mkdir()
 
     mock_config_with_custom_timeout = {
+        'type': 'lmstudio',
         'api_url': 'http://fake-api-for-timeout.com',
         'api_key': 'fake_key_timeout',
         'input_dir': str(input_dir),
@@ -259,7 +264,7 @@ def test_main_passes_timeout_to_api_handler(tmp_path, mocker, caplog):
     }
 
     m_load_config = mocker.patch('src.main.load_config', return_value=mock_config_with_custom_timeout)
-    m_call_api = mocker.patch('src.main.call_lm_studio_api', return_value="## Markdown with custom timeout")
+    m_call_api = mocker.patch('src.main.call_llm_api', return_value="## Markdown with custom timeout")
 
     # Create a dummy input file
     test_file = input_dir / "test_timeout.txt"
@@ -270,10 +275,11 @@ def test_main_passes_timeout_to_api_handler(tmp_path, mocker, caplog):
     m_load_config.assert_called_once()
     assert m_call_api.call_count == 1
 
-    # Assert that call_lm_studio_api was called with the custom timeout
+    # Assert that call_llm_api was called with the custom timeout
     m_call_api.assert_called_once_with(
         "Test content for timeout",
         mock_config_with_custom_timeout['api_url'],
+        mock_config_with_custom_timeout['type'],
         mock_config_with_custom_timeout['api_key'],
         timeout=custom_timeout,
         model_identifier='test-model-for-timeout',
@@ -298,7 +304,7 @@ class TestCachingLogic:
     @pytest.fixture(autouse=True)
     def common_mocks(self, mocker): # Add mocker here explicitly
         self.m_load_config = mocker.patch('src.main.load_config')
-        self.m_call_api = mocker.patch('src.main.call_lm_studio_api', return_value="## Mocked Markdown")
+        self.m_call_api = mocker.patch('src.main.call_llm_api', return_value="## Mocked Markdown")
 
         # Mock Path methods that are used in process_directory
         self.m_path_class = mocker.patch('src.main.Path', autospec=True)
@@ -368,6 +374,7 @@ class TestCachingLogic:
             'api_key': None,
             'api_timeout': 60,
             'model_identifier': None, # Added to base_config for completeness
+            'type': 'lmstudio',  # Added for server type
             # Default logging setup for tests, actual log content not primary focus here
             'log_file': 'test_cache.log',
             'log_level': 'DEBUG'

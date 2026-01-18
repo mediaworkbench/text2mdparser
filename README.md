@@ -1,11 +1,11 @@
 # Text-to-Markdown Conversion Agent
 
-This agent converts text files from an input directory to Markdown files in an output directory using a large language model (LLM) via an LM Studio compatible API.
+This agent converts text files from an input directory to Markdown files in an output directory using a large language model (LLM) via LM Studio or Ollama APIs.
 
 ## Features
 
 *   **Recursive Directory Traversal:** Scans the specified input directory and its subdirectories for `.txt` files.
-*   **Text-to-Markdown Conversion:** For each found text file, its content is sent to an LLM API (e.g., Gemma 3 running in LM Studio) to generate Markdown.
+*   **Text-to-Markdown Conversion:** For each found text file, its content is sent to an LLM API (e.g., Gemma 3 running in LM Studio or Ollama) to generate Markdown.
 *   **Mirrored Output Structure:** Creates corresponding Markdown (`.md`) files in a specified output directory, preserving the original folder hierarchy.
 *   **Intelligent Caching:** Automatically skips processing files when the output is already up-to-date (based on modification time comparison). This dramatically speeds up subsequent runs when only a few files have changed.
 *   **Configuration Driven:** Uses a `config.ini` file for easy setup of API endpoint, directories, model parameters, caching behavior, and logging preferences.
@@ -16,10 +16,10 @@ This agent converts text files from an input directory to Markdown files in an o
 ## Prerequisites
 
 *   **Python 3.x:** (Developed with Python 3.10)
-*   **LM Studio (or compatible API):**
-    *   An instance of LM Studio (or any other server providing an OpenAI-compatible chat completions API) must be running and accessible.
+*   **LM Studio or Ollama:**
+    *   An instance of LM Studio or Ollama providing an OpenAI-compatible chat completions API must be running and accessible.
     *   A model (e.g., Gemma 3) should be loaded and served through the API endpoint.
-*   **API Endpoint URL:** You need the URL for the chat completions endpoint (e.g., `http://localhost:1234/v1/chat/completions`).
+*   **API Endpoint URL:** You need the URL for the chat completions endpoint (e.g., `http://localhost:1234/v1/chat/completions` for LM Studio or `http://localhost:11434/api/chat` for Ollama).
 
 ## Setup & Installation
 

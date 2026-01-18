@@ -11,7 +11,7 @@ if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
 from src.config_handler import load_config
-from src.api_handler import call_lm_studio_api
+from src.api_handler import call_llm_api
 from src.logger import setup_logging # Import setup_logging
 import logging # Import logging
 
@@ -118,9 +118,10 @@ def process_directory():
 
         logger.debug(f"Calling API for file: {file_path.name}")
         api_timeout = config.get('api_timeout', 60) # Ensure a default here as well
-        markdown_output = call_lm_studio_api(
+        markdown_output = call_llm_api(
             file_content,
             config['api_url'],
+            config['type'],
             config.get('api_key'),
             timeout=api_timeout,
             model_identifier=model_identifier,
